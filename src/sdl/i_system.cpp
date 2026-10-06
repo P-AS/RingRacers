@@ -2447,6 +2447,21 @@ static const char *locateWad(void)
 	{
 		return returnWadPath;
 	}
+
+	// Game data copied into the app's Documents directory (Files app or Finder file sharing)
+	{
+		char *documents = iOS_GetHomePath();
+		if (documents != NULL)
+		{
+			snprintf(returnWadPath, sizeof(returnWadPath), "%s", documents);
+			free(documents);
+			I_OutputMsg(",%s", returnWadPath);
+			if (isWadPathOk(returnWadPath))
+			{
+				return returnWadPath;
+			}
+		}
+	}
 #endif
 
 	// examine default dirs
