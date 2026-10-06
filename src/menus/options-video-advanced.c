@@ -65,6 +65,7 @@ menuitem_t OPTIONS_VideoAdvanced[] =
 	{IT_STRING | IT_CVAR, "Renderer", "If you don't know why you're changing this, leave it on Software!",
 		NULL, {.cvar = &cv_renderer}, 0, 0},
 
+#ifdef HWRENDER
 	{IT_HEADER, "Legacy GL Options...", "Watch people get confused anyway!!",
 		NULL, {NULL}, 0, 0},
 
@@ -96,6 +97,7 @@ menuitem_t OPTIONS_VideoAdvanced[] =
 
 	{IT_STRING | IT_CVAR, "Software Perspective", "Emulates Software shearing when looking up or down. Not recommended.",
 		NULL, {.cvar = &cv_glshearing}, 0, 0},
+#endif
 };
 
 menu_t OPTIONS_VideoAdvancedDef = {

@@ -3,8 +3,6 @@
 target_sources(SRB2SDL2 PRIVATE
 	new_sound.cpp
 	ogl_sdl.c
-	rhi_gl2_platform.cpp
-	rhi_gl2_platform.hpp
 	i_threads.c
 	i_net.c
 	i_system.cpp
@@ -14,6 +12,18 @@ target_sources(SRB2SDL2 PRIVATE
 	endtxt.c
 	hwsym_sdl.c
 )
+
+if("${CMAKE_SYSTEM_NAME}" MATCHES "iOS")
+	target_sources(SRB2SDL2 PRIVATE
+		rhi_metal_platform.cpp
+		rhi_metal_platform.hpp
+	)
+else()
+	target_sources(SRB2SDL2 PRIVATE
+		rhi_gl2_platform.cpp
+		rhi_gl2_platform.hpp
+	)
+endif()
 
 if("${CMAKE_SYSTEM_NAME}" MATCHES Windows)
 	target_sources(SRB2SDL2 PRIVATE
@@ -48,6 +58,33 @@ if("${CMAKE_SYSTEM_NAME}" MATCHES Darwin)
 
 		RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/macosx/Srb2mac.icns"
 	)
+endif()
+
+if("${CMAKE_SYSTEM_NAME}" MATCHES "iOS")
+	target_sources(SRB2SDL2 PRIVATE
+		ios/ios_resources.c
+		ios/ios_resources.h
+	)
+	set_target_properties(SRB2SDL2 PROPERTIES
+		OUTPUT_NAME "RingRacers"
+		MACOSX_BUNDLE_BUNDLE_NAME "Ring Racers"
+		MACOSX_BUNDLE_BUNDLE_VERSION ${SRB2_VERSION}
+		MACOSX_BUNDLE_SHORT_VERSION_STRING ${SRB2_VERSION}
+		MACOSX_BUNDLE_GUI_IDENTIFIER "org.kartkrew.ringracers"
+		XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "org.kartkrew.ringracers"
+		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/ios/Info.plist.in"
+		# must be set here since Xcode overwrites the setting in Info.plist.in
+		XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
+	)
+	set(SRB2_IOS_FRAMEWORKS
+		UIKit Foundation CoreFoundation CoreGraphics QuartzCore
+		CoreAudio AudioToolbox AVFoundation CoreMotion
+		GameController CoreHaptics CoreBluetooth Metal
+	)
+	foreach(fwname ${SRB2_IOS_FRAMEWORKS})
+		find_library(SRB2_IOS_FRAMEWORK_${fwname} ${fwname})
+		target_link_libraries(SRB2SDL2 PRIVATE ${SRB2_IOS_FRAMEWORK_${fwname}})
+	endforeach()
 endif()
 
 target_link_libraries(SRB2SDL2

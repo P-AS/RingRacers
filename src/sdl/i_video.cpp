@@ -23,9 +23,17 @@
 
 #include <imgui.h>
 
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#endif
+
 #include "../rhi/rhi.hpp"
+#if TARGET_OS_IPHONE
+#include "rhi_metal_platform.hpp"
+#else
 #include "../rhi/gl2/gl2_rhi.hpp"
 #include "rhi_gl2_platform.hpp"
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4214 4244)
@@ -241,7 +249,9 @@ static void SDLSetMode(int width, int height, bool fullscreen, bool reposition)
 	else
 #endif
 	{
+#if !TARGET_OS_IPHONE
 		SDL_GL_SetSwapInterval(cv_vidwait.value ? 1 : 0);
+#endif
 	}
 
 	SDL_GetWindowSize(window, &width, &height);
@@ -1302,6 +1312,25 @@ static void init_imgui()
 
 static bool Impl_CreateContext(void)
 {
+#if TARGET_OS_IPHONE
+	init_imgui();
+
+	if (!g_rhi)
+	{
+		try
+		{
+			g_rhi = rhi::create_metal_rhi(std::make_unique<rhi::SdlMetalPlatform>(window));
+		}
+		catch (const std::exception& ex)
+		{
+			SDL_DestroyWindow(window);
+			I_Error("Failed to initialize Metal: %s\n", ex.what());
+		}
+		g_rhi_generation += 1;
+	}
+
+	return true;
+#else
 	if (!sdlglcontext)
 	{
 		SDL_GL_ResetAttributes();
@@ -1333,6 +1362,7 @@ static bool Impl_CreateContext(void)
 	}
 
 	return true;
+#endif
 }
 
 void VID_CheckGLLoaded(rendermode_t oldrender)
@@ -1452,8 +1482,16 @@ static bool Impl_CreateWindow(bool fullscreen)
 	if (borderlesswindow)
 		flags |= SDL_WINDOW_BORDERLESS;
 
+#if TARGET_OS_IPHONE
+	// RHI: Metal on iOS.
+	// High pixel density gives a native resolution drawable. The game still works in window points
+	// (vid.realwidth/realheight); I_FinishUpdate scales its output by I_GetDisplayPixelDensity().
+	flags |= SDL_WINDOW_METAL | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+	SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight");
+#else
 	// RHI: always create window as OPENGL
 	flags |= SDL_WINDOW_OPENGL;
+#endif
 
 	// Create a window
 	window = SDL_CreateWindow("Dr. Robotnik's Ring Racers " VERSIONSTRING,
@@ -1598,7 +1636,9 @@ void I_StartupGraphics(void)
 
 	graphics_started = true;
 
+#if !TARGET_OS_IPHONE
 	SDL_GL_SwapWindow(window);
+#endif
 
 #ifdef __APPLE__
 	// Must pump events once after creating window before window will actually appear.
@@ -1705,6 +1745,16 @@ rhi::Rhi* srb2::sys::get_rhi(rhi::Handle<rhi::Rhi> handle)
 
 #endif
 
+float I_GetDisplayPixelDensity(void)
+{
+	if (window == nullptr)
+	{
+		return 1.f;
+	}
+	float density = SDL_GetWindowPixelDensity(window);
+	return density > 0.f ? density : 1.f;
+}
+
 uint32_t I_GetRefreshRate(void)
 {
 	// Moved to VID_GetRefreshRate.
@@ -1728,9 +1778,14 @@ void srb2::cvarhandler::on_set_vid_wait()
 		interval = 1;
 	}
 
+#if TARGET_OS_IPHONE
+	// Metal presentation is always synced to the display on iOS.
+	(void)interval;
+#else
 	if (sdlglcontext == nullptr || SDL_GL_GetCurrentContext() != sdlglcontext)
 	{
 		return;
 	}
 	SDL_GL_SetSwapInterval(interval);
+#endif
 }

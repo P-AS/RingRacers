@@ -168,6 +168,11 @@ void I_EndRead(void);
 
 uint32_t I_GetRefreshRate(void);
 
+/**	\brief	Ratio of default framebuffer pixels to window points.
+	vid.realwidth and vid.realheight are in points; scale by this for pixel coordinates.
+*/
+float I_GetDisplayPixelDensity(void);
+
 void I_CaptureVideoFrame(void);
 
 void VID_BeginLegacyGLRenderPass(void);

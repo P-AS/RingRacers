@@ -1,0 +1,32 @@
+name: iOS
+
+on:
+  push:
+    branches: [ "next", "master", "ci", "ios-slopported" ]
+  pull_request:
+    branches: [ "next", "master" ]
+
+jobs:
+  build:
+    continue-on-error: true
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v7.0.1
+
+    - name: Restore vcpkg binary cache
+      uses: actions/cache@v6
+      with:
+        path: ~/.cache/vcpkg/archives
+        key: vcpkg-ios-${{ hashFiles('src/sdl/ios/vcpkg.json', 'src/sdl/ios/triplets/*', 'src/sdl/ios/overlay-ports/**') }}
+        restore-keys: vcpkg-ios-
+
+    # Game assets are not redistributable, so CI builds without them.
+    - name: Build Ring Racers
+      run: ./build-ios.sh --noassets
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v7.0.1
+      with:
+        name: ringracers-iOS-${{ github.sha }}
+        path: "build-ios/device/bin/Release/RingRacers.ipa"

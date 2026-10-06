@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <vector>
 
 #include <imgui.h>
@@ -191,6 +192,8 @@ static void new_imgui_frame()
 	ImGuiIO& io = ImGui::GetIO();
 	io.DisplaySize.x = vid.realwidth;
 	io.DisplaySize.y = vid.realheight;
+	const float density = I_GetDisplayPixelDensity();
+	io.DisplayFramebufferScale = ImVec2(density, density);
 	ImGui::NewFrame();
 	g_imgui_frame_active = true;
 }
@@ -263,14 +266,19 @@ void I_FinishUpdate(void)
 
 	rhi->push_default_render_pass(true);
 
+	// vid.realwidth/realheight are in window points; the default framebuffer may have more pixels (iOS).
+	const float density = I_GetDisplayPixelDensity();
+	const float output_width = vid.realwidth * density;
+	const float output_height = vid.realheight * density;
+
 	// Upscale draw the backbuffer (with postprocessing maybe?)
 	if (cv_scr_scale.value != FRACUNIT)
 	{
 		float f = std::max(FixedToFloat(cv_scr_scale.value), 0.f);
-		float w = vid.realwidth * f;
-		float h = vid.realheight * f;
-		float x = (vid.realwidth - w) * (0.5f + (FixedToFloat(cv_scr_x.value) * 0.5f));
-		float y = (vid.realheight - h) * (0.5f + (FixedToFloat(cv_scr_y.value) * 0.5f));
+		float w = output_width * f;
+		float h = output_height * f;
+		float x = (output_width - w) * (0.5f + (FixedToFloat(cv_scr_x.value) * 0.5f));
+		float y = (output_height - h) * (0.5f + (FixedToFloat(cv_scr_y.value) * 0.5f));
 
 		g_hw_state.blit_rect->set_output(x, y, w, h, true, true);
 		g_hw_state.sharp_bilinear_blit_rect->set_output(x, y, w, h, true, true);
@@ -279,10 +287,12 @@ void I_FinishUpdate(void)
 	}
 	else
 	{
-		g_hw_state.blit_rect->set_output(0, 0, vid.realwidth, vid.realheight, true, true);
-		g_hw_state.sharp_bilinear_blit_rect->set_output(0, 0, vid.realwidth, vid.realheight, true, true);
-		g_hw_state.crt_blit_rect->set_output(0, 0, vid.realwidth, vid.realheight, true, true);
-		g_hw_state.crtsharp_blit_rect->set_output(0, 0, vid.realwidth, vid.realheight, true, true);
+		const uint32_t w = static_cast<uint32_t>(std::lround(output_width));
+		const uint32_t h = static_cast<uint32_t>(std::lround(output_height));
+		g_hw_state.blit_rect->set_output(0, 0, w, h, true, true);
+		g_hw_state.sharp_bilinear_blit_rect->set_output(0, 0, w, h, true, true);
+		g_hw_state.crt_blit_rect->set_output(0, 0, w, h, true, true);
+		g_hw_state.crtsharp_blit_rect->set_output(0, 0, w, h, true, true);
 	}
 	g_hw_state.blit_rect->set_texture(g_hw_state.backbuffer->color(), static_cast<uint32_t>(vid.width), static_cast<uint32_t>(vid.height));
 	g_hw_state.sharp_bilinear_blit_rect->set_texture(g_hw_state.backbuffer->color(), static_cast<uint32_t>(vid.width), static_cast<uint32_t>(vid.height));

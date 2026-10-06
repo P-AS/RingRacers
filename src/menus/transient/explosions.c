@@ -13,6 +13,7 @@
 
 #include "../../k_menu.h"
 #include "../../m_cond.h" // Condition Sets
+#include "../../screen.h"
 
 struct setup_explosions_s setup_explosions[CSEXPLOSIONS];
 

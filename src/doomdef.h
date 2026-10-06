@@ -436,8 +436,14 @@ enum {
 	LE_PARAMWIDTH      =  -100  // If an object that calls LinedefExecute has a nonzero parameter value, this times the parameter will be subtracted. (Mostly for the purpose of coexisting bosses...)
 };
 
+#ifdef __APPLE__
+#include <TargetConditionals.h>
+#endif
+
 // Name of local directory for config files and savegames
-#if (((defined (__unix__) && !defined (MSDOS)) || defined (UNIXCOMMON)) && !defined (__CYGWIN__)) && !defined (__APPLE__)
+// (none on iOS: user data lives directly in the app's Documents directory)
+#if TARGET_OS_IPHONE
+#elif (((defined (__unix__) && !defined (MSDOS)) || defined (UNIXCOMMON)) && !defined (__CYGWIN__)) && !defined (__APPLE__)
 #define DEFAULTDIR ".ringracers"
 #else
 #define DEFAULTDIR "ringracers"

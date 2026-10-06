@@ -88,6 +88,10 @@
 
 #include "lua_profile.h"
 
+#if TARGET_OS_IPHONE
+#include "sdl/ios/ios_resources.h"
+#endif
+
 extern "C" consvar_t cv_lua_profile, cv_menuframeskip;
 
 /* Manually defined asset hashes
@@ -1638,7 +1642,7 @@ void D_SRB2Main(void)
 #else // DEFAULTDIR
 			snprintf(srb2home, sizeof srb2home, "%s", userhome);
 			if (dedicated)
-				snprintf(configfile, sizeof configfile, "%s" PATHSEP "d"CONFIGFILENAME, userhome);
+				snprintf(configfile, sizeof configfile, "%s" PATHSEP "d" CONFIGFILENAME, userhome);
 			else
 				snprintf(configfile, sizeof configfile, "%s" PATHSEP CONFIGFILENAME, userhome);
 
@@ -2309,6 +2313,15 @@ const char *D_Home(void)
 
 #ifdef ANDROID
 	return "/data/data/org.srb2/";
+#endif
+
+#if TARGET_OS_IPHONE
+	// The app's Documents directory, which is visible in the Files app
+	static char *ioshome = NULL;
+	if (ioshome == NULL)
+		ioshome = iOS_GetHomePath();
+	if (ioshome != NULL)
+		return ioshome;
 #endif
 
 	if (M_CheckParm("-home") && M_IsNextParm())

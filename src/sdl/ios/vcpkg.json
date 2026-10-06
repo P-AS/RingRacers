@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "ringracers-ios",
+  "version": "1.0.0",
+  "$comment": "iOS-only manifest. Uses a newer baseline than the desktop manifest because iOS 27 requires SDL3 >= 3.4 (UIScene lifecycle support).",
+  "builtin-baseline": "001713e802f5cf619a64461b918161be6a0634f0",
+  "dependencies": [
+    "curl",
+    "libogg",
+    "libpng",
+    "libvorbis",
+    "libvpx",
+    "libyuv",
+    "opus",
+    "sdl3",
+    "zlib"
+  ]
+}

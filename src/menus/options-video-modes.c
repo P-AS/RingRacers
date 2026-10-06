@@ -13,6 +13,7 @@
 #include "../k_menu.h"
 #include "../i_video.h"
 #include "../s_sound.h"
+#include "../screen.h"
 
 menuitem_t OPTIONS_VideoModes[] = {
 

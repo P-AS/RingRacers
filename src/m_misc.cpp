@@ -60,6 +60,7 @@
 
 // So that the screenshot menu auto-updates...
 #include "k_menu.h"
+#include "am_map.h"
 
 #ifdef HWRENDER
 #include "hardware/hw_main.h"

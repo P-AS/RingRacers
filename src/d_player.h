@@ -1128,9 +1128,7 @@ struct player_t
 
 	uint8_t public_key[PUBKEYLENGTH];
 
-#ifdef HWRENDER
 	fixed_t fovadd; // adjust FOV for hw rendering
-#endif
 
 	sonicloopvars_t loop;
 	roundconditions_t roundconditions;

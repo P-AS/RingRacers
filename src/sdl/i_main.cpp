@@ -105,6 +105,13 @@ static void InitLogging(void)
 					"%s" PATHSEP DEFAULTDIR PATHSEP "%s" PATHSEP, logdir, reldir);
 		}
 		else
+#else
+		if (logdir)
+		{
+			left = snprintf(logfilename, sizeof logfilename,
+					"%s" PATHSEP "%s" PATHSEP, logdir, reldir);
+		}
+		else
 #endif/*DEFAULTDIR*/
 		{
 			left = snprintf(logfilename, sizeof logfilename,
@@ -124,6 +131,10 @@ static void InitLogging(void)
 #ifdef DEFAULTDIR
 	if (logdir)
 		link = va("%s/" DEFAULTDIR "/latest-log.txt", logdir);
+	else
+#else
+	if (logdir)
+		link = va("%s/latest-log.txt", logdir);
 	else
 #endif/*DEFAULTDIR*/
 		link = "latest-log.txt";

@@ -5163,6 +5163,8 @@ static void Command_Version_f(void)
 	CONS_Printf("Linux ");
 #elif defined(MACOSX)
 	CONS_Printf("macOS ");
+#elif TARGET_OS_IPHONE
+	CONS_Printf("iOS ");
 #elif defined(UNIXCOMMON)
 	CONS_Printf("Unix (Common) ");
 #else

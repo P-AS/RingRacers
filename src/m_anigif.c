@@ -495,7 +495,6 @@ static size_t gifframe_size = 8192;
 // GIF_rgbconvert
 // converts an RGB frame to a frame with a palette.
 //
-#ifdef HWRENDER
 static colorlookup_t gif_colorlookup;
 
 static void GIF_rgbconvert(const uint8_t *linear, uint8_t *scr)
@@ -516,7 +515,6 @@ static void GIF_rgbconvert(const uint8_t *linear, uint8_t *scr)
 		dest += scrbuf_downscaleamt;
 	}
 }
-#endif
 
 //
 // GIF_framewrite

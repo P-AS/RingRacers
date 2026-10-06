@@ -137,7 +137,11 @@ typedef LPVOID (WINAPI *p_MapViewOfFile) (HANDLE, DWORD, DWORD, DWORD, SIZE_T);
 #endif
 
 #ifdef __APPLE__
+#if TARGET_OS_OSX
 #include "macosx/mac_resources.h"
+#elif TARGET_OS_IPHONE
+#include "ios/ios_resources.h"
+#endif
 #endif
 
 #ifndef errno
@@ -2427,8 +2431,17 @@ static const char *locateWad(void)
 	}
 #endif
 
-#ifdef __APPLE__
+#if TARGET_OS_OSX
 	OSX_GetResourcesPath(returnWadPath);
+	I_OutputMsg(",%s", returnWadPath);
+	if (isWadPathOk(returnWadPath))
+	{
+		return returnWadPath;
+	}
+#endif
+
+#if TARGET_OS_IPHONE
+	iOS_GetResourcesPath(returnWadPath);
 	I_OutputMsg(",%s", returnWadPath);
 	if (isWadPathOk(returnWadPath))
 	{

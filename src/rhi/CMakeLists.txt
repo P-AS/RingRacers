@@ -6,4 +6,8 @@ target_sources(SRB2SDL2 PRIVATE
 	shader_load_context.hpp
 )
 
-add_subdirectory(gl2)
+if(CMAKE_SYSTEM_NAME MATCHES "iOS")
+	add_subdirectory(metal)
+else()
+	add_subdirectory(gl2)
+endif()

@@ -23,3 +23,6 @@ Win32_LIB_ASM_Release
 /bin
 /build
 /CMakeUserPresets.json
+/assets/installer
+/build-ios
+.DS_Store

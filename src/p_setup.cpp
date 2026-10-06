@@ -3662,7 +3662,6 @@ static fixed_t P_SegLength(seg_t *seg)
 	return FixedHypot(dx, dy)<<1;
 }
 
-#ifdef HWRENDER
 /** Computes the length of a seg as a float.
   * This is needed for OpenGL.
   *
@@ -3679,7 +3678,6 @@ static inline float P_SegLengthFloat(seg_t *seg)
 
 	return (float)hypot(dx, dy);
 }
-#endif
 
 /** Updates the light offset
   *
