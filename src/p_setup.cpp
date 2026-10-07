@@ -20,6 +20,7 @@
 
 #include "doomdef.h"
 #include "d_main.h"
+#include "d_clisrv.h" // D_NetCompat
 #include "byteptr.h"
 #include "g_game.h"
 
@@ -4006,6 +4007,13 @@ static dboolean P_LoadExtendedSubsectorsAndSegs(uint8_t **data, nodetype_t nodet
 				if (checkline == k)
 				{
 					I_Error("P_LoadExtendedSubsectorsAndSegs: Subsector %s does not have any valid segs!", sizeu1(i));
+				}
+
+				// v2.4 skipped leading gl segs without adjusting numlines.
+				// Sight checks and subsector lookups depend on this range.
+				if (D_NetCompat())
+				{
+					subsectors[i].firstline = checkline;
 				}
 			}
 			break;

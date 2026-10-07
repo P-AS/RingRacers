@@ -593,6 +593,24 @@ extern dboolean server_lagless;
 extern consvar_t cv_mindelay;
 
 extern consvar_t cv_netticbuffer, cv_allownewplayer, cv_maxconnections, cv_joindelay;
+
+// Network compatibility with v2.4 servers.
+// When cv_netcompat is on, clients identify themselves as v2.4 and
+// restore v2.4 gameplay behavior that would otherwise desync.
+#define NETCOMPAT_VERSION 2
+#define NETCOMPAT_SUBVERSION 4
+#define NETCOMPAT_MODVERSION 13
+
+extern consvar_t cv_netcompat;
+
+// True while connected as a client with netcompat enabled. Latched when
+// connecting, so toggling the cvar mid-game cannot cause a desync.
+dboolean D_NetCompat(void);
+
+// Version numbers to advertise/accept, accounting for netcompat.
+int32_t D_NetVersion(void);
+int32_t D_NetSubversion(void);
+int32_t D_NetModVersion(void);
 extern consvar_t cv_pingtimeout, cv_blamecfail;
 extern consvar_t cv_maxsend, cv_noticedownload, cv_downloadspeed;
 

@@ -11,9 +11,16 @@
 
 #include "../k_menu.h"
 #include "../m_cond.h"
+#include "../d_clisrv.h" // cv_netcompat
 
 menuitem_t OPTIONS_Gameplay[] =
 {
+	{IT_HEADER, "Netplay...", NULL,
+		NULL, {NULL}, 0, 0},
+
+	{IT_STRING | IT_CVAR, "v2.4 Netcompat", "Find and join servers running v2.4. Takes effect on your next connection.",
+		NULL, {.cvar = &cv_netcompat}, 0, 0},
+
 	{IT_HEADER, "Global...", NULL,
 		NULL, {NULL}, 0, 0},
 
