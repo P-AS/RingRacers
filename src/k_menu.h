@@ -486,7 +486,9 @@ extern menu_t OPTIONS_HUDOnlineDef;
 
 typedef enum
 {
-	gopt_spacer0 = 0,
+	gopt_spacernet = 0,
+	gopt_netcompat,
+	gopt_spacer0,
 	gopt_teamplay,
 	gopt_frantic,
 	gopt_spacer1,
