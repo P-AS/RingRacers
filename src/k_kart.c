@@ -25,6 +25,7 @@
 #include "doomdef.h"
 #include "hu_stuff.h"
 #include "g_game.h"
+#include "d_clisrv.h" // D_NetCompat
 #include "g_input.h"    // for device rumble
 #include "m_random.h"
 #include "p_local.h"
@@ -4303,10 +4304,18 @@ fixed_t K_GetKartAccel(const player_t *player)
 		stat = 1;
 	}
 
-	k_accel += 17 * stat;
-	if (k_accel < 4)
+	if (D_NetCompat())
 	{
-		k_accel = 4;
+		// v2.4 used an unsigned stat, which wraps for kartspeed > 9, and had no floor.
+		k_accel += 17 * (uint8_t)stat;
+	}
+	else
+	{
+		k_accel += 17 * stat;
+		if (k_accel < 4)
+		{
+			k_accel = 4;
+		}
 	}
 
 	// Marble Garden Top gets 1200% accel

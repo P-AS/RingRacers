@@ -18,6 +18,7 @@
 #include "k_specialstage.h"
 #include "doomdef.h"
 #include "d_player.h"
+#include "d_clisrv.h" // D_NetCompat
 #include "g_game.h"
 #include "k_bot.h"
 #include "k_kart.h"
@@ -764,7 +765,8 @@ static dboolean CompareReplacements(player_t *a, player_t *b)
 {
 	// if both players participated in the race
 	// otherwise, don't try to push non-participant to the back
-	if (a->position != 0 && b->position != 0)
+	// (v2.4 always pushed NO CONTEST to the back)
+	if (D_NetCompat() || (a->position != 0 && b->position != 0))
 	{
 		if ((a->pflags & PF_NOCONTEST) != (b->pflags & PF_NOCONTEST))
 		{
@@ -1098,8 +1100,11 @@ void K_FakeBotResults(player_t *bot)
 	// hey, you "won"
 	bot->exiting = 1;
 	bot->realtime += (bot->distancetofinish / distfactor);
-	bot->gradingpointnum = K_GetNumGradingPoints();
-	bot->exp = K_GetEXP(bot);
+	if (!D_NetCompat()) // v2.4 left these as they were
+	{
+		bot->gradingpointnum = K_GetNumGradingPoints();
+		bot->exp = K_GetEXP(bot);
+	}
 	bot->distancetofinish = 0;
 	K_IncreaseBotDifficulty(bot);
 }

@@ -17,6 +17,7 @@
 #include "doomdef.h"
 #include "doomtype.h"
 #include "m_cond.h" // gamedata->totalplaytime
+#include "d_clisrv.h" // D_NetCompat
 
 #include "m_random.h"
 #include "m_fixed.h"
@@ -242,7 +243,8 @@ uint8_t P_RandomByteD(const char *rfile, int32_t rline, pr_class_t pr_class)
 {
 	CONS_Printf("P_RandomByte(%u) at: %sp %d\n", pr_class, rfile, rline);
 #endif
-	return (uint8_t)(__internal_prng_bound__(pr_class, UINT8_MAX+1));
+	// v2.4 could never return 255; netcompat has to roll the same numbers.
+	return (uint8_t)(__internal_prng_bound__(pr_class, D_NetCompat() ? UINT8_MAX : UINT8_MAX+1));
 }
 
 /** Provides a random integer for picking random elements from an array.

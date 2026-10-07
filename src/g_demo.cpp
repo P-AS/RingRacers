@@ -2131,8 +2131,9 @@ void G_BeginRecording(void)
 
 	// Setup header.
 	M_Memcpy(demobuf.p, DEMOHEADER, 12); demobuf.p += 12;
-	WRITEUINT8(demobuf.p,VERSION);
-	WRITEUINT8(demobuf.p,SUBVERSION);
+	// Replays of netcompat games only play back correctly with v2.4 rules.
+	WRITEUINT8(demobuf.p,D_NetCompat() ? NETCOMPAT_VERSION : VERSION);
+	WRITEUINT8(demobuf.p,D_NetCompat() ? NETCOMPAT_SUBVERSION : SUBVERSION);
 	WRITEUINT16(demobuf.p,DEMOVERSION);
 
 	demo.version = DEMOVERSION;

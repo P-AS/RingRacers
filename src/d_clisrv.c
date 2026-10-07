@@ -104,6 +104,7 @@
 
 dboolean server = true; // true or false but !server == client
 #define client (!server)
+static dboolean netcompat_latched = false; // cv_netcompat at the time we connected
 dboolean nodownload = false;
 dboolean serverrunning = false;
 dboolean connectedtodedicated = false;
@@ -960,8 +961,8 @@ static dboolean CL_SendJoin(void)
 	netbuffer->u.clientcfg.localplayers = localplayers;
 	netbuffer->u.clientcfg._255 = 255;
 	netbuffer->u.clientcfg.packetversion = PACKETVERSION;
-	netbuffer->u.clientcfg.version = VERSION;
-	netbuffer->u.clientcfg.subversion = SUBVERSION;
+	netbuffer->u.clientcfg.version = netcompat_latched ? NETCOMPAT_VERSION : VERSION;
+	netbuffer->u.clientcfg.subversion = netcompat_latched ? NETCOMPAT_SUBVERSION : SUBVERSION;
 	strncpy(netbuffer->u.clientcfg.application, SRB2APPLICATION,
 			sizeof netbuffer->u.clientcfg.application);
 
@@ -1576,7 +1577,7 @@ static void SendAskInfo(int32_t node)
 	asktime = I_GetTime();
 
 	netbuffer->packettype = PT_ASKINFO;
-	netbuffer->u.askinfo.version = VERSION;
+	netbuffer->u.askinfo.version = D_NetVersion();
 	netbuffer->u.askinfo.time = (tic_t)LSBF_LONG(asktime);
 
 	// Even if this never arrives due to the host being firewalled, we've
@@ -1639,10 +1640,10 @@ static dboolean SL_InsertServer(serverinfo_pak* info, int8_t node)
 		if (info->packetversion != PACKETVERSION)
 			return false; // old new packet format
 
-		if (info->version != VERSION)
+		if (info->version != D_NetVersion())
 			return false; // Not same version.
 
-		if (info->subversion != SUBVERSION)
+		if (info->subversion != D_NetSubversion())
 			return false; // Close, but no cigar.
 
 		if (strcmp(info->application, SRB2APPLICATION))
@@ -2336,6 +2337,11 @@ static void CL_ConnectToServer(void)
 
 	cl_mode = CL_SEARCHING;
 
+	// Only clients can join v2.4 servers; our own server is always native.
+	netcompat_latched = (client && cv_netcompat.value);
+	if (netcompat_latched)
+		CONS_Printf(M_GetText("Netcompat enabled, connecting as v%d.%d\n"), NETCOMPAT_VERSION, NETCOMPAT_SUBVERSION);
+
 	// Don't get a corrupt savegame error because tmpsave already exists
 	if (FIL_FileExists(tmpsave) && unlink(tmpsave) == -1)
 		I_Error("Can't delete %s\n", tmpsave);
@@ -2752,6 +2758,7 @@ void CL_Reset(void)
 	multiplayer = false;
 	servernode = 0;
 	server = true;
+	netcompat_latched = false;
 	connectedtodedicated = false;
 	doomcom->numnodes = 1;
 	doomcom->numslots = 1;
@@ -4259,6 +4266,26 @@ static void GotOurIP(uint32_t address)
 	ourIP = address;
 }
 #endif
+
+dboolean D_NetCompat(void)
+{
+	return netcompat_latched && netgame && client;
+}
+
+int32_t D_NetVersion(void)
+{
+	return cv_netcompat.value ? NETCOMPAT_VERSION : VERSION;
+}
+
+int32_t D_NetSubversion(void)
+{
+	return cv_netcompat.value ? NETCOMPAT_SUBVERSION : SUBVERSION;
+}
+
+int32_t D_NetModVersion(void)
+{
+	return cv_netcompat.value ? NETCOMPAT_MODVERSION : MODVERSION;
+}
 
 // is there a game running
 dboolean Playing(void)

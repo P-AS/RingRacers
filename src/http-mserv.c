@@ -409,7 +409,7 @@ HMS_fetch_servers (msg_server_t *list, int query_id)
 
 	(void)query_id;
 
-	hms = HMS_connect("games/%s/%d/servers", SRB2APPLICATION, MODVERSION);
+	hms = HMS_connect("games/%s/%d/servers", SRB2APPLICATION, D_NetModVersion());
 
 	if (! hms)
 		return NULL;
@@ -503,7 +503,7 @@ HMS_compare_mod_version (char *buffer, size_t buffer_size)
 
 		if (version && version_name)
 		{
-			if (atoi(version) != MODVERSION)
+			if (atoi(version) != D_NetModVersion())
 			{
 				strlcpy(buffer, version_name, buffer_size);
 				ok = 1;

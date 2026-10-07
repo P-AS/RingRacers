@@ -13,6 +13,7 @@
 #include <optional>
 
 #include "../doomdef.h"
+#include "../d_clisrv.h"
 #include "../k_kart.h"
 #include "../taglist.h"
 #include "../p_local.h"
@@ -59,9 +60,15 @@ set_shiftxy
 	const angle_t th =
 		(R_PointToAngle2(0, 0, dx, dy) - a->angle);
 
-	const fixed_t adj = FixedMul(
-			FCOS(AbsAngle(th - ANGLE_90)),
-			FixedHypot(dx, dy)) / 2;
+	fixed_t cosine = FCOS(AbsAngle(th - ANGLE_90));
+
+	if (D_NetCompat())
+	{
+		// v2.4 behavior, broken for left-to-right loops
+		cosine = abs(cosine);
+	}
+
+	const fixed_t adj = FixedMul(cosine, FixedHypot(dx, dy)) / 2;
 
 	vector2_t *xy = &player->loop.shift;
 
